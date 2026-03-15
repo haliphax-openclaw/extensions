@@ -2,9 +2,15 @@
   "name": "rooms",
   "version": "0.1.0",
   "description": "Multi-agent broadcast rooms for collaboration",
+  "scripts": {
+    "test": "npx vitest --run"
+  },
   "openclaw": {
     "extensions": [
       "./index.ts"
     ]
+  },
+  "devDependencies": {
+    "vitest": "^4.1.0"
   }
 }
