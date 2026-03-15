@@ -2,11 +2,25 @@ import { RoomManager } from "./room-manager";
 
 let manager: RoomManager | null = null;
 
-function getManager(log: any): RoomManager {
+function getManager(): RoomManager {
   if (!manager) {
-    manager = new RoomManager({ log });
+    throw new Error("Rooms service not started");
   }
   return manager;
+}
+
+function createRoomsService() {
+  return {
+    id: "rooms-ipc",
+    async start(ctx: any): Promise<void> {
+      manager = new RoomManager({ log: ctx.logger });
+      ctx.logger.info("Rooms plugin registered");
+    },
+    async stop(_ctx: any): Promise<void> {
+      manager?.destroy();
+      manager = null;
+    },
+  };
 }
 
 const roomsPlugin = {
@@ -16,20 +30,10 @@ const roomsPlugin = {
   configSchema: { type: "object" as const, additionalProperties: false, properties: {} },
 
   register(api: any) {
-    const log = api.logger;
-    const mgr = getManager(log);
+    api.registerService(createRoomsService());
 
     api.on("session_end", async (event: any) => {
-      if (event?.sessionId) mgr.removeBySession(event.sessionId);
-    });
-
-    api.on("gateway_start", async () => {
-      log.info("Rooms plugin registered");
-    });
-
-    api.on("gateway_stop", async () => {
-      mgr.destroy();
-      manager = null;
+      if (event?.sessionId && manager) manager.removeBySession(event.sessionId);
     });
 
     api.registerTool(
@@ -49,6 +53,7 @@ const roomsPlugin = {
           },
           async execute(_id: string, params: { room: string; agentId: string }) {
             try {
+              const mgr = getManager();
               const result = mgr.join(params.agentId, ctx.sessionKey ?? params.agentId, params.room);
               return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
             } catch (err: any) {
@@ -76,6 +81,7 @@ const roomsPlugin = {
           },
           async execute(_id: string, params: { room: string; agentId: string }) {
             try {
+              const mgr = getManager();
               mgr.leave(params.agentId, params.room);
               return { content: [{ type: "text" as const, text: JSON.stringify({ ok: true }) }] };
             } catch (err: any) {
@@ -109,6 +115,7 @@ const roomsPlugin = {
             params: { room: string; message: string; agentId: string; contentType?: "text" | "json" }
           ) {
             try {
+              const mgr = getManager();
               const result = mgr.send(params.agentId, params.room, params.message, params.contentType ?? "text");
               return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
             } catch (err: any) {
@@ -136,6 +143,7 @@ const roomsPlugin = {
           },
           async execute(_id: string, params: { room?: string; agentId: string }) {
             try {
+              const mgr = getManager();
               const result = mgr.list(params.agentId, params.room);
               return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
             } catch (err: any) {
@@ -164,6 +172,7 @@ const roomsPlugin = {
           },
           async execute(_id: string, params: { room?: string; agentId: string }) {
             try {
+              const mgr = getManager();
               const messages = mgr.recv(params.agentId, params.room);
               return { content: [{ type: "text" as const, text: JSON.stringify({ messages, count: messages.length }) }] };
             } catch (err: any) {
@@ -174,8 +183,6 @@ const roomsPlugin = {
       },
       { names: ["room_recv"] },
     );
-
-
   },
 };
 
