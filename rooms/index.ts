@@ -171,7 +171,7 @@ const roomsPlugin = {
       { names: ["room_recv"] },
     );
 
-    log.info("Rooms plugin registered");
+
   },
 };
 
