@@ -9,7 +9,6 @@ src/plugins/rooms/
 ├── index.ts            # Plugin entry point — tool registration, lifecycle hooks
 ├── room-manager.ts     # Core RoomManager class — all room/member/retry/logging logic
 ├── ring-buffer.ts      # Fixed-size ring buffer for bounded message inboxes
-├── schema.ts           # Placeholder (schemas are inline in index.ts as plain JSON Schema)
 ├── openclaw.plugin.json # Plugin manifest (required by OpenClaw)
 ├── package.json        # Package metadata with openclaw.extensions entry
 └── README.md           # User-facing documentation
@@ -90,6 +89,7 @@ Transcript files are written to `~/.openclaw/rooms/<roomName>.log` via `logToTra
 - **agentId as parameter**: Agents pass their own agentId because the static tool execute signature (`execute(_id, params)`) doesn't provide session context. The factory function's `ctx.agentId` is available at registration time but not at execution time.
 - **Rate limiting**: 20 messages per agent per room per second, enforced via a token bucket per member.
 - **No external deps**: Runs entirely in-process using Node.js primitives. No Redis, no IPC sockets, no external services.
+- **Pull-based delivery, no protocol schemas**: Room messages are delivered via the `room_recv` tool (as tool return values), not as server-push WebSocket events. No TypeBox protocol schemas are needed. If a future version adds server-push delivery, add TypeBox schemas and register them in the gateway protocol schema.
 
 ## Common Pitfalls
 
