@@ -23,6 +23,10 @@ const roomsPlugin = {
       if (event?.sessionId) mgr.removeBySession(event.sessionId);
     });
 
+    api.on("gateway_start", async () => {
+      log.info("Rooms plugin registered");
+    });
+
     api.on("gateway_stop", async () => {
       mgr.destroy();
       manager = null;
