@@ -1,0 +1,10 @@
+{
+  "name": "rooms",
+  "version": "0.1.0",
+  "description": "Multi-agent broadcast rooms for collaboration",
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}

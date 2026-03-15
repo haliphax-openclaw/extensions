@@ -1,0 +1,10 @@
+{
+  "id": "rooms",
+  "name": "Room IPC",
+  "description": "Multi-agent broadcast rooms for collaboration",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}
